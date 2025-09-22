@@ -106,32 +106,21 @@ export function Sidebar({ onViewChange }: SidebarProps) {
       {/* Menu */}
       <nav className="flex-1 px-4 py-5 overflow-y-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
         {menuSections.map((section, sectionIndex) => (
-          <motion.div 
-            key={section.title} 
-            className="mb-5"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: sectionIndex * 0.1, duration: 0.3 }}
-          >
+          <div key={section.title} className="mb-5">
             <h3 className="text-xs font-medium text-muted-foreground mb-2 px-1">
               {section.title}
             </h3>
             <ul className="space-y-1">
               {section.items.map((item, itemIndex) => (
-                <motion.li 
-                  key={item.label}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: (sectionIndex * 0.1) + (itemIndex * 0.05), duration: 0.3 }}
-                >
+                <li key={item.label}>
                   <div>
-                    <motion.button
+                    <button
                       onClick={() => {
                         setActiveItem(item.label)
                         if (item.hasSubmenu) {
                           toggleSubmenu(item.label)
                         } else {
-                          // Handle view changes
+                          // Handle view changes - Fixed logic
                           if (item.label === "eCommerce" && onViewChange) {
                             onViewChange("orders")
                           } else if (item.label === "Default" && onViewChange) {
@@ -140,78 +129,51 @@ export function Sidebar({ onViewChange }: SidebarProps) {
                         }
                       }}
                       className={cn(
-                        "w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-200",
+                        "w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors duration-200",
                         activeItem === item.label || item.isActive
                           ? "bg-foreground text-background"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted/20",
                       )}
-                      whileHover={{ x: 2 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.2 }}
                     >
                       <div className="flex items-center space-x-2">
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <item.icon className="w-4 h-4 flex-shrink-0" />
-                        </motion.div>
+                        <item.icon className="w-4 h-4 flex-shrink-0" />
                         <span className="truncate">{item.label}</span>
                       </div>
                       {item.hasSubmenu && (
-                        <motion.div
-                          animate={{ 
-                            rotate: expandedMenus.includes(item.label) ? 180 : 0 
-                          }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <ChevronDown className="w-4 h-4" />
-                        </motion.div>
+                        <ChevronDown
+                          className={cn(
+                            "w-4 h-4 transition-transform duration-200",
+                            expandedMenus.includes(item.label) ? "rotate-180" : "",
+                          )}
+                        />
                       )}
-                    </motion.button>
+                    </button>
 
                     {/* Submenu */}
-                    <AnimatePresence>
-                      {item.hasSubmenu && expandedMenus.includes(item.label) && (
-                        <motion.ul 
-                          className="ml-6 mt-1 space-y-0.5 overflow-hidden"
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                          {item.submenu?.map((subItem, subIndex) => (
-                            <motion.li 
-                              key={subItem}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              exit={{ opacity: 0, x: -10 }}
-                              transition={{ delay: subIndex * 0.05, duration: 0.2 }}
+                    {item.hasSubmenu && expandedMenus.includes(item.label) && (
+                      <ul className="ml-6 mt-1 space-y-0.5 transition-all duration-200 ease-in-out">
+                        {item.submenu?.map((subItem, subIndex) => (
+                          <li key={subItem}>
+                            <button
+                              onClick={() => setActiveItem(subItem)}
+                              className={cn(
+                                "w-full text-left px-2 py-1 rounded-md text-sm transition-colors duration-200",
+                                activeItem === subItem
+                                  ? "text-foreground bg-muted/30"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/10",
+                              )}
                             >
-                              <motion.button
-                                onClick={() => setActiveItem(subItem)}
-                                className={cn(
-                                  "w-full text-left px-2 py-1 rounded-md text-sm transition-all duration-200",
-                                  activeItem === subItem
-                                    ? "text-foreground bg-muted/30"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-muted/10",
-                                )}
-                                whileHover={{ x: 2 }}
-                                whileTap={{ scale: 0.98 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                {subItem}
-                              </motion.button>
-                            </motion.li>
-                          ))}
-                        </motion.ul>
-                      )}
-                    </AnimatePresence>
+                              {subItem}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                </motion.li>
+                </li>
               ))}
             </ul>
-          </motion.div>
+          </div>
         ))}
       </nav>
     </div>

@@ -1,26 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { MetricsCards } from "@/components/metrics-cards";
-import { ChartsSection } from "@/components/charts-section";
-import { OrderList } from "@/components/order-list";
 import { MobileSidebar } from "@/components/mobile-sidebar";
-import { NotificationsPanel } from "@/components/notifications-panel";
-import { ProjectionsChart } from "@/components/projections-chart";
+import { LoadingScreen, useLoadingState } from "@/components/loading-screen";
+
+// Lazy load heavy components for better performance
+const MetricsCards = lazy(() => import("@/components/metrics-cards").then(m => ({ default: m.MetricsCards })));
+const ChartsSection = lazy(() => import("@/components/charts-section").then(m => ({ default: m.ChartsSection })));
+const OrderList = lazy(() => import("@/components/order-list").then(m => ({ default: m.OrderList })));
+const NotificationsPanel = lazy(() => import("@/components/notifications-panel").then(m => ({ default: m.NotificationsPanel })));
+const ProjectionsChart = lazy(() => import("@/components/projections-chart").then(m => ({ default: m.ProjectionsChart })));
+
+// Loading fallback component
+const ComponentLoader = () => (
+  <div className="flex items-center justify-center p-4">
+    <div className="w-6 h-6 border-2 border-muted border-t-primary rounded-full animate-spin"></div>
+  </div>
+);
 
 export default function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [currentView, setCurrentView] = useState("dashboard");
+  const { isLoading } = useLoadingState();
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
     document.documentElement.classList.toggle("dark");
   };
+
+  // Manage body and html classes for loading state
+  useEffect(() => {
+    if (isLoading) {
+      document.body.classList.add('loading-state');
+      document.documentElement.classList.add('loading-state');
+    } else {
+      // Delay removal to ensure smooth transition
+      const timer = setTimeout(() => {
+        document.body.classList.remove('loading-state');
+        document.documentElement.classList.remove('loading-state');
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.classList.remove('loading-state');
+      document.documentElement.classList.remove('loading-state');
+    };
+  }, [isLoading]);
 
   // Animation variants for page transitions
   const pageVariants = {
@@ -37,6 +69,9 @@ export default function Dashboard() {
 
   return (
     <>
+      {/* Loading Screen */}
+      <LoadingScreen isLoading={isLoading} />
+      
       <div className={`min-h-screen bg-background ${darkMode ? "dark" : ""}`}>
         <div className="flex">
           {/* Desktop Sidebar */}
@@ -60,83 +95,59 @@ export default function Dashboard() {
           />
 
           <div className="flex flex-1">
-            <main className={`flex-1 overflow-x-hidden ${currentView === "dashboard" ? "p-4 lg:p-1" : "p-4 lg:p-6"}`}>
+            <main className={`flex-1 overflow-x-hidden ${currentView === "dashboard" ? "p-4 lg:p-1" : "p-4 lg:p-6"} ${isLoading ? 'overflow-hidden' : ''}`}>
               <AnimatePresence mode="wait">
-                {currentView === "dashboard" ? (
-                  <motion.div
-                    key="dashboard"
-                    initial="initial"
-                    animate="in"
-                    exit="out"
-                    variants={pageVariants}
-                    transition={pageTransition}
-                    className="space-y-4 lg:space-y-2"
-                  >
+                {!isLoading && currentView === "dashboard" ? (
+                  <div className="space-y-4 lg:space-y-2">
                     {/* Mobile and Desktop Grid Layout */}
-                    <motion.div 
-                      className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1, duration: 0.5 }}
-                    >
-                      <motion.div 
-                        className="w-full"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2, duration: 0.5 }}
-                      >
-                        <MetricsCards />
-                      </motion.div>
-                      <motion.div 
-                        className="w-full"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.3, duration: 0.5 }}
-                      >
-                        <ProjectionsChart />
-                      </motion.div>
-                    </motion.div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                      <div className="w-full">
+                        <Suspense fallback={<ComponentLoader />}>
+                          <MetricsCards />
+                        </Suspense>
+                      </div>
+                      <div className="w-full">
+                        <Suspense fallback={<ComponentLoader />}>
+                          <ProjectionsChart />
+                        </Suspense>
+                      </div>
+                    </div>
 
-                    <motion.div 
-                      className="w-full"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4, duration: 0.5 }}
-                    >
-                      <ChartsSection />
-                    </motion.div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="orders"
-                    initial="initial"
-                    animate="in"
-                    exit="out"
-                    variants={pageVariants}
-                    transition={pageTransition}
-                    className="w-full"
-                  >
-                    <OrderList />
-                  </motion.div>
-                )}
+                    <div className="w-full">
+                      <Suspense fallback={<ComponentLoader />}>
+                        <ChartsSection />
+                      </Suspense>
+                    </div>
+                  </div>
+                ) : !isLoading && currentView === "orders" ? (
+                  <div className="w-full">
+                    <Suspense fallback={<ComponentLoader />}>
+                      <OrderList />
+                    </Suspense>
+                  </div>
+                ) : null}
               </AnimatePresence>
             </main>
             
             {/* Desktop Notifications Panel - Show on large screens and up for dashboard view */}
             {currentView === "dashboard" && (
               <div className="hidden lg:block">
-                <NotificationsPanel />
+                <Suspense fallback={<ComponentLoader />}>
+                  <NotificationsPanel />
+                </Suspense>
               </div>
             )}
           </div>
           </div>
           
           {/* Mobile Notifications Panel */}
-          <NotificationsPanel 
-            isMobile={true}
-            isOpen={notificationsOpen}
-            onClose={() => setNotificationsOpen(false)}
-          />
+          <Suspense fallback={null}>
+            <NotificationsPanel 
+              isMobile={true}
+              isOpen={notificationsOpen}
+              onClose={() => setNotificationsOpen(false)}
+            />
+          </Suspense>
         </div>
       </div>
     </>

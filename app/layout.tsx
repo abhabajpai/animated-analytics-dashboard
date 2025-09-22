@@ -5,9 +5,9 @@ import "./globals.css";
 import AnalyticsWrapper from "./AnalyticsWrapper";
 
 export const metadata: Metadata = {
-  title: "App",
-  description: "",
-  generator: "",
+  title: "Analytics Dashboard",
+  description: "Modern analytics dashboard with smooth animations and dark theme support",
+  generator: "Next.js",
 };
 
 export default function RootLayout({

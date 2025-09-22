@@ -45,67 +45,35 @@ export const MetricsCards = memo(function MetricsCards() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-2">
       {metrics.map((metric, index) => (
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: index * 0.1, duration: 0.5 }}
-          whileHover={{ 
-            y: -2,
-            transition: { duration: 0.2 }
-          }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Card className="bg-card border-border hover:shadow-lg transition-all duration-300 mb-1 mx-1 sm:mx-3 cursor-pointer">
+        <div key={index}>
+          <Card className="bg-card border-border hover:shadow-md transition-shadow duration-200 mb-1 mx-1 sm:mx-3">
             <CardContent className="p-2">
               <div className="flex items-center justify-between mb-2">
-                <motion.div 
-                  className={cn("p-1 rounded-md", metric.color)}
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ duration: 0.2 }}
-                />
+                <div className={cn("p-1 rounded-md", metric.color)} />
               </div>
               <div>
                 <p className="text-m font-bold text-bold-foreground mb-2">{metric.title}</p>
                 <div className="flex items-center justify-between">
-                  <motion.p 
-                    className="text-lg font-semibold text-card-foreground mb-0.5"
-                    initial={{ scale: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <p className="text-lg font-semibold text-card-foreground mb-0.5">
                     {metric.value}
-                  </motion.p>
-                  <motion.div 
-                    className="flex items-center space-x-2 text-s"
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  </p>
+                  <div className="flex items-center space-x-2 text-s">
                     <span className={cn("font-medium", metric.changeType === "positive" ? "text-green-500" : "text-red-500")}>
                       {metric.change}
                     </span>
-                    <motion.div
-                      animate={{ 
-                        y: metric.changeType === "positive" ? [0, -2, 0] : [0, 2, 0]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                      }}
-                    >
+                    <div>
                       {metric.changeType === "positive" ? (
                         <TrendingUp className="w-3 h-3" />
                       ) : (
                         <TrendingDown className="w-3 h-3" />
                       )}
-                    </motion.div>
-                  </motion.div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       ))}
     </div>
   )
