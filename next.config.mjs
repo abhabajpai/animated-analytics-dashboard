@@ -16,10 +16,11 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['framer-motion', 'lucide-react', 'recharts'],
-  },
+  // Temporarily disabled experimental features for stable build
+  // experimental: {
+  //   optimizeCss: true,
+  //   optimizePackageImports: ['framer-motion', 'lucide-react', 'recharts'],
+  // },
 }
 
 export default nextConfig

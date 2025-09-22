@@ -21,7 +21,20 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
-const menuSections = [
+interface MenuItem {
+  icon: React.ComponentType<any>;
+  label: string;
+  hasSubmenu: boolean;
+  isActive?: boolean;
+  submenu?: string[];
+}
+
+interface MenuSection {
+  title: string;
+  items: MenuItem[];
+}
+
+const menuSections: MenuSection[] = [
   {
     title: "Favorites",
     items: [

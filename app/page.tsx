@@ -103,26 +103,26 @@ export default function Dashboard() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
                       <div className="w-full">
                         <Suspense fallback={<ComponentLoader />}>
-                          <MetricsCards />
+                        <MetricsCards />
                         </Suspense>
                       </div>
                       <div className="w-full">
                         <Suspense fallback={<ComponentLoader />}>
-                          <ProjectionsChart />
+                        <ProjectionsChart />
                         </Suspense>
                       </div>
                     </div>
 
                     <div className="w-full">
                       <Suspense fallback={<ComponentLoader />}>
-                        <ChartsSection />
+                      <ChartsSection />
                       </Suspense>
                     </div>
                   </div>
                 ) : !isLoading && currentView === "orders" ? (
                   <div className="w-full">
                     <Suspense fallback={<ComponentLoader />}>
-                      <OrderList />
+                    <OrderList />
                     </Suspense>
                   </div>
                 ) : null}
@@ -133,7 +133,7 @@ export default function Dashboard() {
             {currentView === "dashboard" && (
               <div className="hidden lg:block">
                 <Suspense fallback={<ComponentLoader />}>
-                  <NotificationsPanel />
+                <NotificationsPanel />
                 </Suspense>
               </div>
             )}
@@ -142,11 +142,11 @@ export default function Dashboard() {
           
           {/* Mobile Notifications Panel */}
           <Suspense fallback={null}>
-            <NotificationsPanel 
-              isMobile={true}
-              isOpen={notificationsOpen}
-              onClose={() => setNotificationsOpen(false)}
-            />
+          <NotificationsPanel 
+            isMobile={true}
+            isOpen={notificationsOpen}
+            onClose={() => setNotificationsOpen(false)}
+          />
           </Suspense>
         </div>
       </div>
