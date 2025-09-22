@@ -27,6 +27,7 @@ interface MenuItem {
   hasSubmenu: boolean;
   isActive?: boolean;
   submenu?: string[];
+  isClickable?: boolean;
 }
 
 interface MenuSection {
@@ -38,24 +39,24 @@ const menuSections: MenuSection[] = [
   {
     title: "Favorites",
     items: [
-      { icon: Home, label: "Overview", hasSubmenu: false },
-      { icon: FolderOpen, label: "Projects", hasSubmenu: false },
+      { icon: Home, label: "Overview", hasSubmenu: false, isClickable: false },
+      { icon: FolderOpen, label: "Projects", hasSubmenu: false, isClickable: false },
     ],
   },
   {
     title: "Recently",
     items: [
-      { icon: Home, label: "Overview", hasSubmenu: false },
-      { icon: FolderOpen, label: "Projects", hasSubmenu: false },
+      { icon: Home, label: "Overview", hasSubmenu: false, isClickable: false },
+      { icon: FolderOpen, label: "Projects", hasSubmenu: false, isClickable: false },
     ],
   },
   {
     title: "Dashboards",
     items: [
-      { icon: Home, label: "Default", hasSubmenu: false, isActive: true },
-      { icon: BarChart3, label: "eCommerce", hasSubmenu: false },
-      { icon: FolderOpen, label: "Projects", hasSubmenu: false },
-      { icon: BookOpen, label: "Online Courses", hasSubmenu: false },
+      { icon: Home, label: "Default", hasSubmenu: false, isClickable: true },
+      { icon: BarChart3, label: "eCommerce", hasSubmenu: false, isClickable: true },
+      { icon: FolderOpen, label: "Projects", hasSubmenu: false, isClickable: false },
+      { icon: BookOpen, label: "Online Courses", hasSubmenu: false, isClickable: false },
     ],
   },
   {
@@ -66,11 +67,12 @@ const menuSections: MenuSection[] = [
         label: "User Profile",
         hasSubmenu: true,
         submenu: ["Overview", "Projects", "Campaigns", "Documents", "Followers"],
+        isClickable: true,
       },
-      { icon: CreditCard, label: "Account", hasSubmenu: false },
-      { icon: Building2, label: "Corporate", hasSubmenu: false },
-      { icon: FileText, label: "Blog", hasSubmenu: false },
-      { icon: Share2, label: "Social", hasSubmenu: false },
+      { icon: CreditCard, label: "Account", hasSubmenu: false, isClickable: false },
+      { icon: Building2, label: "Corporate", hasSubmenu: false, isClickable: false },
+      { icon: FileText, label: "Blog", hasSubmenu: false, isClickable: false },
+      { icon: Share2, label: "Social", hasSubmenu: false, isClickable: false },
     ],
   },
 ]
@@ -79,11 +81,19 @@ interface MobileSidebarProps {
   isOpen: boolean
   onClose: () => void
   onViewChange?: (view: string) => void
+  currentView?: string
 }
 
-export function MobileSidebar({ isOpen, onClose, onViewChange }: MobileSidebarProps) {
-  const [activeItem, setActiveItem] = useState("Default")
+export function MobileSidebar({ isOpen, onClose, onViewChange, currentView = "dashboard" }: MobileSidebarProps) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([])
+  const [activeSubmenuItem, setActiveSubmenuItem] = useState<string | null>(null)
+
+  // Determine active item based on current view
+  const getActiveItem = () => {
+    if (currentView === "dashboard") return "Default"
+    if (currentView === "orders") return "eCommerce"
+    return "Default" // fallback
+  }
 
   const toggleSubmenu = (label: string) => {
     setExpandedMenus((prev) =>
@@ -142,25 +152,30 @@ export function MobileSidebar({ isOpen, onClose, onViewChange }: MobileSidebarPr
                       <div>
                   <button
                     onClick={() => {
-                      setActiveItem(item.label)
-                            if (item.hasSubmenu) {
-                              toggleSubmenu(item.label)
-                            } else {
-                              // Handle view changes
-                              if (item.label === "eCommerce" && onViewChange) {
-                                onViewChange("orders")
-                              } else if (item.label === "Default" && onViewChange) {
-                                onViewChange("dashboard")
-                              }
-                              onClose()
-                            }
-                          }}
-                          className={cn(
-                            "w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-all duration-200",
-                            activeItem === item.label || item.isActive
-                              ? "bg-foreground text-background"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted/20",
-                          )}
+                      // Only handle clicks for clickable items
+                      if (!item.isClickable && !item.hasSubmenu) return
+                      
+                      if (item.hasSubmenu) {
+                        toggleSubmenu(item.label)
+                      } else if (item.isClickable) {
+                        // Handle view changes for clickable items only
+                        if (item.label === "eCommerce" && onViewChange) {
+                          onViewChange("orders")
+                        } else if (item.label === "Default" && onViewChange) {
+                          onViewChange("dashboard")
+                        }
+                        onClose()
+                      }
+                    }}
+                    className={cn(
+                      "w-full flex items-center justify-between px-2 py-1.5 rounded-md text-sm transition-colors duration-200",
+                      getActiveItem() === item.label
+                        ? "bg-foreground text-background"
+                        : item.isClickable || item.hasSubmenu
+                        ? "text-muted-foreground hover:text-foreground hover:bg-muted/20 cursor-pointer"
+                        : "text-muted-foreground/60 cursor-default",
+                    )}
+                    disabled={!item.isClickable && !item.hasSubmenu}
                         >
                           <div className="flex items-center space-x-2">
                             <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -183,12 +198,12 @@ export function MobileSidebar({ isOpen, onClose, onViewChange }: MobileSidebarPr
                               <li key={subItem}>
                                 <button
                                   onClick={() => {
-                                    setActiveItem(subItem)
+                                    setActiveSubmenuItem(subItem)
                                     onClose()
                                   }}
                                   className={cn(
-                                    "w-full text-left px-2 py-1 rounded-md text-sm transition-all duration-200",
-                                    activeItem === subItem
+                                    "w-full text-left px-2 py-1 rounded-md text-sm transition-colors duration-200",
+                                    activeSubmenuItem === subItem
                                       ? "text-foreground bg-muted/30"
                                       : "text-muted-foreground hover:text-foreground hover:bg-muted/10",
                                   )}

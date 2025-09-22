@@ -74,16 +74,17 @@ export default function Dashboard() {
       
       <div className={`min-h-screen bg-background ${darkMode ? "dark" : ""}`}>
         <div className="flex">
-          {/* Desktop Sidebar */}
-          <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
-            <Sidebar onViewChange={setCurrentView} />
-          </div>
+                {/* Desktop Sidebar */}
+                <div className="hidden lg:block lg:w-64 lg:flex-shrink-0">
+                  <Sidebar onViewChange={setCurrentView} currentView={currentView} />
+                </div>
 
           {/* Mobile Sidebar */}
           <MobileSidebar
             isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             onViewChange={setCurrentView}
+            currentView={currentView}
           />
 
           <div className="flex flex-col flex-1 min-w-0">
